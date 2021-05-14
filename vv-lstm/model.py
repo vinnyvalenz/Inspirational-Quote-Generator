@@ -3,9 +3,14 @@
 #	Some modifications have been made for the purppose of this project
 ############################################################
 
+# This code runs models trained on google colab
+# The model needs to be reproduced here but not trained as this code will load the saved weights
+# Changes concerning the particulars of the model need to be made before running each new set of saved weights
+
 # Load LSTM network and generate text
 import sys
 import numpy
+import pathlib as p
 import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense
@@ -31,7 +36,7 @@ print("Total Characters: ", n_chars)
 print("Total Vocab: ", n_vocab)
 
 # prepare the dataset of input to output pairs encoded as integers
-seq_length = 50
+seq_length = 75
 dataX = []
 dataY = []
 for i in range(0, n_chars - seq_length, 1):
@@ -54,14 +59,15 @@ y = np_utils.to_categorical(dataY)
 
 # define the LSTM model
 model = Sequential()
-model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2])))
-model.add(Dropout(0.2))
-model.add(Dense(y.shape[1], activation='softmax'))
+model.add(LSTM(512, input_shape=(X.shape[1], X.shape[2])))
+model.add(Dropout(0.1))
+model.add(Dense(y.shape[1], activation='sigmoid'))
 
 # load the network weights
-filename = "vv-lstm\seq50-weights-improvement-16-0.0172.hdf5"
+
+filename = str(p.Path.cwd().joinpath('saved_models', 'seq75-weights-improvement-10-1.4976.hdf5'))
 model.load_weights(filename)
-model.compile(loss='mean_squared_error', optimizer='adam')
+model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 # pick a random seed
 start = numpy.random.randint(0, len(dataX)-1)
